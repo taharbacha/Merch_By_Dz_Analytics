@@ -34,12 +34,11 @@ interface AppState {
 const AppContext = createContext<AppState | undefined>(undefined);
 
 /**
- * SECURITY BEST PRACTICE:
- * We retrieve the password from an environment variable.
- * On Vercel, add 'APP_ADMIN_PASSWORD' in Project Settings > Environment Variables.
- * For local testing, it defaults to the known password.
+ * PRODUCTION SECURITY:
+ * The password is now pulled from 'APP_PASSWORD' environment variable.
+ * Set this in your Vercel Project Settings > Environment Variables.
  */
-const ADMIN_PASSWORD = (process.env as any).APP_ADMIN_PASSWORD || "merchdz_private_2025";
+const ADMIN_PASSWORD = (process.env as any).APP_PASSWORD || "merchdz_private_2025";
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -74,7 +73,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [offres]);
 
   const login = (password: string) => {
-    if (password === ADMIN_PASSWORD) {
+    // Check if password exists and matches the environment variable
+    if (password && password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       localStorage.setItem('merch_dz_auth', 'true');
       return true;
