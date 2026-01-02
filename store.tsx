@@ -35,10 +35,23 @@ const AppContext = createContext<AppState | undefined>(undefined);
 
 /**
  * PRODUCTION SECURITY:
- * The password is now pulled from 'APP_PASSWORD' environment variable.
- * Set this in your Vercel Project Settings > Environment Variables.
+ * Safely check for the environment variable. 
+ * 'typeof process' check prevents ReferenceError in browser.
  */
-const ADMIN_PASSWORD = (process.env as any).APP_PASSWORD || "merchdz_private_2025";
+const getAdminPassword = (): string => {
+  try {
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env && process.env.APP_PASSWORD) {
+      // @ts-ignore
+      return process.env.APP_PASSWORD;
+    }
+  } catch (e) {
+    console.warn("Could not access process.env, using fallback.");
+  }
+  return "merchdz_private_2025";
+};
+
+const ADMIN_PASSWORD = getAdminPassword();
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -73,7 +86,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [offres]);
 
   const login = (password: string) => {
-    // Check if password exists and matches the environment variable
     if (password && password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       localStorage.setItem('merch_dz_auth', 'true');
