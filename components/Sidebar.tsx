@@ -1,15 +1,18 @@
 
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useAppStore } from '../store';
 import { 
   LayoutDashboard, 
   Truck, 
   ShoppingBag, 
   TrendingUp,
-  User
+  User,
+  LogOut
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
+  const { logout } = useAppStore();
   const navItems = [
     { to: '/', label: 'Tableau de bord', icon: LayoutDashboard },
     { to: '/gros', label: 'Commandes GROS', icon: Truck },
@@ -42,11 +45,18 @@ const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-100">
+      <div className="p-4 border-t border-slate-100 space-y-1">
         <div className="flex items-center gap-3 px-4 py-3 text-slate-500">
           <User size={20} />
           <span className="text-sm font-medium">Administrateur</span>
         </div>
+        <button 
+          onClick={logout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium text-sm"
+        >
+          <LogOut size={20} />
+          <span>Déconnexion</span>
+        </button>
       </div>
     </aside>
   );

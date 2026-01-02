@@ -1,14 +1,21 @@
 
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import CommandesGros from './pages/CommandesGros';
 import CommandesDetail from './pages/CommandesDetail';
 import Offres from './pages/Offres';
-import { AppProvider } from './store';
+import LoginPage from './pages/LoginPage';
+import { AppProvider, useAppStore } from './store';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAppStore();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -21,18 +28,24 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+      <Route path="/gros" element={<ProtectedLayout><CommandesGros /></ProtectedLayout>} />
+      <Route path="/detail" element={<ProtectedLayout><CommandesDetail /></ProtectedLayout>} />
+      <Route path="/offres" element={<ProtectedLayout><Offres /></ProtectedLayout>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <AppProvider>
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/gros" element={<CommandesGros />} />
-            <Route path="/detail" element={<CommandesDetail />} />
-            <Route path="/offres" element={<Offres />} />
-          </Routes>
-        </Layout>
+        <AppRoutes />
       </Router>
     </AppProvider>
   );

@@ -11,6 +11,9 @@ interface AppState {
   gros: CommandeGros[];
   extern: CommandeExtern[];
   offres: Offre[];
+  isAuthenticated: boolean;
+  login: (password: string) => boolean;
+  logout: () => void;
   updateGros: (id: string, field: keyof CommandeGros, value: any) => void;
   addGros: () => void;
   deleteGros: (id: string) => void;
@@ -30,7 +33,19 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
+/**
+ * SECURITY BEST PRACTICE:
+ * We retrieve the password from an environment variable.
+ * On Vercel, add 'APP_ADMIN_PASSWORD' in Project Settings > Environment Variables.
+ * For local testing, it defaults to the known password.
+ */
+const ADMIN_PASSWORD = (process.env as any).APP_ADMIN_PASSWORD || "merchdz_private_2025";
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('merch_dz_auth') === 'true';
+  });
+
   const [gros, setGros] = useState<CommandeGros[]>(() => {
     const saved = localStorage.getItem('merch_dz_gros');
     return saved ? JSON.parse(saved) : INITIAL_GROS;
@@ -57,6 +72,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('merch_dz_offres', JSON.stringify(offres));
   }, [offres]);
+
+  const login = (password: string) => {
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      localStorage.setItem('merch_dz_auth', 'true');
+      return true;
+    }
+    return false;
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('merch_dz_auth');
+  };
 
   const updateGros = (id: string, field: keyof CommandeGros, value: any) => {
     setGros(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
@@ -217,7 +246,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{ 
-      gros, extern, offres, 
+      gros, extern, offres, isAuthenticated, login, logout,
       updateGros, addGros, deleteGros, importGros,
       updateExtern, addExtern, deleteExtern, importExtern,
       updateOffre, addOffre, deleteOffre, importOffres,
