@@ -13,10 +13,16 @@ interface AppState {
   offres: Offre[];
   updateGros: (id: string, field: keyof CommandeGros, value: any) => void;
   addGros: () => void;
+  deleteGros: (id: string) => void;
+  importGros: (data: Omit<CommandeGros, 'id'>[]) => void;
   updateExtern: (id: string, field: keyof CommandeExtern, value: any) => void;
   addExtern: () => void;
+  deleteExtern: (id: string) => void;
+  importExtern: (data: Omit<CommandeExtern, 'id'>[]) => void;
   updateOffre: (id: string, field: keyof Offre, value: any) => void;
   addOffre: () => void;
+  deleteOffre: (id: string) => void;
+  importOffres: (data: Omit<Offre, 'id'>[]) => void;
   getCalculatedGros: () => CalculatedGros[];
   getCalculatedExtern: () => CalculatedExtern[];
   getDashboardData: () => DashboardData;
@@ -57,7 +63,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addGros = () => {
-    const newId = Math.random().toString(36).substr(2, 9);
+    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     setGros(prev => [
       ...prev,
       {
@@ -76,12 +82,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
   };
 
+  const deleteGros = (id: string) => {
+    setGros(prev => prev.filter(item => String(item.id) !== String(id)));
+  };
+
+  const importGros = (newData: Omit<CommandeGros, 'id'>[]) => {
+    const itemsWithIds = newData.map(item => ({
+      ...item,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    }));
+    setGros(prev => [...prev, ...itemsWithIds]);
+  };
+
   const updateExtern = (id: string, field: keyof CommandeExtern, value: any) => {
     setExtern(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
   const addExtern = () => {
-    const newId = Math.random().toString(36).substr(2, 9);
+    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     setExtern(prev => [
       ...prev,
       {
@@ -100,12 +118,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
   };
 
+  const deleteExtern = (id: string) => {
+    setExtern(prev => prev.filter(item => String(item.id) !== String(id)));
+  };
+
+  const importExtern = (newData: Omit<CommandeExtern, 'id'>[]) => {
+    const itemsWithIds = newData.map(item => ({
+      ...item,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    }));
+    setExtern(prev => [...prev, ...itemsWithIds]);
+  };
+
   const updateOffre = (id: string, field: keyof Offre, value: any) => {
     setOffres(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
   const addOffre = () => {
-    const newId = Math.random().toString(36).substr(2, 9);
+    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     setOffres(prev => [
       ...prev,
       {
@@ -117,6 +147,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         description: ''
       }
     ]);
+  };
+
+  const deleteOffre = (id: string) => {
+    setOffres(prev => prev.filter(item => String(item.id) !== String(id)));
+  };
+
+  const importOffres = (newData: Omit<Offre, 'id'>[]) => {
+    const itemsWithIds = newData.map(item => ({
+      ...item,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    }));
+    setOffres(prev => [...prev, ...itemsWithIds]);
   };
 
   const getCalculatedGros = useCallback((): CalculatedGros[] => {
@@ -176,9 +218,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{ 
       gros, extern, offres, 
-      updateGros, addGros, 
-      updateExtern, addExtern,
-      updateOffre, addOffre,
+      updateGros, addGros, deleteGros, importGros,
+      updateExtern, addExtern, deleteExtern, importExtern,
+      updateOffre, addOffre, deleteOffre, importOffres,
       getCalculatedGros, getCalculatedExtern, getDashboardData 
     }}>
       {children}

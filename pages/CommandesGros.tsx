@@ -1,18 +1,93 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useAppStore } from '../store';
 import EditableCell from '../components/EditableCell';
-import StatusBadge from '../components/StatusBadge';
-import { GrosStatus } from '../types';
 import { GROS_STATUS_OPTIONS } from '../constants';
-import { Plus, Download } from 'lucide-react';
+import { GrosStatus } from '../types';
+import { Plus, Download, Upload, Trash2 } from 'lucide-react';
 
 const CommandesGros: React.FC = () => {
-  const { getCalculatedGros, updateGros, addGros } = useAppStore();
+  const { getCalculatedGros, updateGros, addGros, deleteGros, importGros } = useAppStore();
   const data = getCalculatedGros();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatPrice = (val: number) => {
     return val.toLocaleString('fr-DZ') + ' DA';
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      const importedData = lines.slice(1)
+        .filter(line => line.trim())
+        .map(line => {
+          const values = line.split(',').map(v => v.trim());
+          const obj: any = {};
+          headers.forEach((header, index) => {
+            const val = values[index];
+            if (header.includes('prix') || header.includes('achat') || header.includes('vente') || header.includes('montant')) {
+              obj[header] = Number(val) || 0;
+            } else if (header === 'impression') {
+              obj[header] = val.toLowerCase() === 'true' || val === '1';
+            } else {
+              obj[header] = val;
+            }
+          });
+
+          return {
+            reference: obj.reference || obj.ref || 'NEW',
+            client_name: obj.client_name || obj.client || '',
+            client_phone: obj.client_phone || obj.contact || '',
+            date_created: obj.date_created || obj.date || new Date().toISOString().split('T')[0],
+            prix_achat_article: obj.prix_achat_article || obj.achat || 0,
+            impression: obj.impression ?? false,
+            prix_impression: obj.prix_impression || 0,
+            prix_vente: obj.prix_vente || obj.vente || 0,
+            status: (obj.status as GrosStatus) || GrosStatus.EN_PRODUCTION,
+            stock_note: obj.stock_note || obj.note || ''
+          };
+        });
+
+      importGros(importedData);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
+  };
+
+  const exportCSV = () => {
+    if (data.length === 0) return;
+    const headers = ["reference", "client_name", "client_phone", "date_created", "prix_achat_article", "impression", "prix_impression", "prix_vente", "status", "stock_note"];
+    const rows = data.map(item => [
+      item.reference,
+      item.client_name,
+      item.client_phone,
+      item.date_created,
+      item.prix_achat_article,
+      item.impression,
+      item.prix_impression,
+      item.prix_vente,
+      item.status,
+      item.stock_note
+    ]);
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + headers.join(",") + "\n"
+      + rows.map(e => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "commandes_gros.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -23,7 +98,29 @@ const CommandesGros: React.FC = () => {
           <p className="text-slate-500">Gestion des commandes en gros et suivi des encaissements.</p>
         </div>
         <div className="flex gap-3">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImportCSV} 
+            accept=".csv" 
+            className="hidden" 
+          />
           <button 
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            <Upload size={18} /> Importer CSV
+          </button>
+          <button 
+            type="button"
+            onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            <Download size={18} /> Exporter CSV
+          </button>
+          <button 
+            type="button"
             onClick={addGros}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm"
           >
@@ -41,11 +138,12 @@ const CommandesGros: React.FC = () => {
                 <th className="p-4 font-semibold text-slate-600">Client</th>
                 <th className="p-4 font-semibold text-slate-600">Contact</th>
                 <th className="p-4 font-semibold text-slate-600">Date</th>
-                <th className="p-4 font-semibold text-slate-600">Achat Art.</th>
+                <th className="p-4 font-semibold text-slate-600 text-right">Achat Art.</th>
                 <th className="p-4 font-semibold text-slate-600">Impression</th>
-                <th className="p-4 font-semibold text-slate-600">Prix Vente</th>
+                <th className="p-4 font-semibold text-slate-600 text-right">Prix Vente</th>
                 <th className="p-4 font-semibold text-slate-600">Status</th>
-                <th className="p-4 font-semibold text-slate-600">Total Profit</th>
+                <th className="p-4 font-semibold text-slate-600 text-right">Total Profit</th>
+                <th className="p-4 font-semibold text-slate-600 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -63,7 +161,7 @@ const CommandesGros: React.FC = () => {
                   <td className="p-2">
                     <EditableCell type="date" value={item.date_created} onSave={(v) => updateGros(item.id, 'date_created', v)} />
                   </td>
-                  <td className="p-2">
+                  <td className="p-2 text-right">
                     <EditableCell type="number" value={item.prix_achat_article} onSave={(v) => updateGros(item.id, 'prix_achat_article', v)} className="text-right" />
                   </td>
                   <td className="p-2">
@@ -79,7 +177,7 @@ const CommandesGros: React.FC = () => {
                       )}
                     </div>
                   </td>
-                  <td className="p-2 font-bold text-slate-800">
+                  <td className="p-2 font-bold text-slate-800 text-right">
                     <EditableCell type="number" value={item.prix_vente} onSave={(v) => updateGros(item.id, 'prix_vente', v)} className="text-right" />
                   </td>
                   <td className="p-2">
@@ -98,11 +196,25 @@ const CommandesGros: React.FC = () => {
                       {formatPrice(item.prix_vente - item.cost)}
                     </span>
                   </td>
+                  <td className="p-2 text-center">
+                    <button 
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteGros(item.id);
+                      }}
+                      title="Supprimer la ligne"
+                      className="p-3 text-slate-400 hover:text-red-600 transition-all flex items-center justify-center mx-auto rounded-lg hover:bg-red-50"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
               {data.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-slate-400">Aucune commande. Ajoutez une ligne pour commencer.</td>
+                  <td colSpan={10} className="p-8 text-center text-slate-400">Aucune commande. Ajoutez une ligne pour commencer.</td>
                 </tr>
               )}
             </tbody>
