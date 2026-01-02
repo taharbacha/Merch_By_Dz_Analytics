@@ -146,26 +146,26 @@ const CommandesDetail: React.FC = () => {
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-2 font-mono text-xs font-bold text-slate-400">
-                    <EditableCell value={item.reference} onSave={(v) => updateExtern(item.id, 'reference', v)} />
+                    <EditableCell value={item.reference} onSave={(v) => updateExtern(item.id, 'reference', v)} className="text-slate-400" />
                   </td>
                   <td className="p-2">
-                    <EditableCell value={item.client_name} onSave={(v) => updateExtern(item.id, 'client_name', v)} className="font-medium" />
+                    <EditableCell value={item.client_name} onSave={(v) => updateExtern(item.id, 'client_name', v)} className="font-semibold text-slate-800" />
                   </td>
                   <td className="p-2 text-slate-500">
-                    <EditableCell value={item.client_phone} onSave={(v) => updateExtern(item.id, 'client_phone', v)} />
+                    <EditableCell value={item.client_phone} onSave={(v) => updateExtern(item.id, 'client_phone', v)} className="text-slate-500" />
                   </td>
-                  <td className="p-2">
-                    <EditableCell type="date" value={item.date_created} onSave={(v) => updateExtern(item.id, 'date_created', v)} />
+                  <td className="p-2 text-slate-600">
+                    <EditableCell type="date" value={item.date_created} onSave={(v) => updateExtern(item.id, 'date_created', v)} className="text-slate-600" />
                   </td>
                   <td className="p-2 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                       <EditableCell type="number" value={item.prix_achat_article} onSave={(v) => updateExtern(item.id, 'prix_achat_article', v)} className="w-20 text-right" />
+                    <div className="flex items-center justify-end gap-2 text-slate-600">
+                       <EditableCell type="number" value={item.prix_achat_article} onSave={(v) => updateExtern(item.id, 'prix_achat_article', v)} className="w-20 text-right text-slate-600" />
                        <span className="text-xs text-slate-400">+</span>
-                       <EditableCell type="number" value={item.prix_impression} onSave={(v) => updateExtern(item.id, 'prix_impression', v)} className="w-20 text-right" />
+                       <EditableCell type="number" value={item.prix_impression} onSave={(v) => updateExtern(item.id, 'prix_impression', v)} className="w-20 text-right text-slate-600" />
                     </div>
                   </td>
                   <td className="p-2 font-bold text-slate-800 text-right">
-                    <EditableCell type="number" value={item.prix_vente} onSave={(v) => updateExtern(item.id, 'prix_vente', v)} className="text-right" />
+                    <EditableCell type="number" value={item.prix_vente} onSave={(v) => updateExtern(item.id, 'prix_vente', v)} className="text-right font-bold text-slate-900" />
                   </td>
                   <td className="p-2">
                     <select 
@@ -179,7 +179,7 @@ const CommandesDetail: React.FC = () => {
                     </select>
                   </td>
                   <td className="p-2 text-slate-500">
-                    <EditableCell value={item.stock_note} onSave={(v) => updateExtern(item.id, 'stock_note', v)} className="text-slate-500" />
+                    <EditableCell value={item.stock_note} onSave={(v) => updateExtern(item.id, 'stock_note', v)} className="text-slate-500 italic" />
                   </td>
                   <td className="p-2 text-center">
                     <button 

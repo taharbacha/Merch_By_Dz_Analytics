@@ -23,6 +23,7 @@ const CommandesGros: React.FC = () => {
     reader.onload = (event) => {
       const text = event.target?.result as string;
       const lines = text.split('\n');
+      if (lines.length < 2) return;
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
       
       const importedData = lines.slice(1)
@@ -150,19 +151,19 @@ const CommandesGros: React.FC = () => {
               {data.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-2 font-mono text-xs font-bold text-slate-400">
-                    <EditableCell value={item.reference} onSave={(v) => updateGros(item.id, 'reference', v)} />
+                    <EditableCell value={item.reference} onSave={(v) => updateGros(item.id, 'reference', v)} className="text-slate-400" />
                   </td>
                   <td className="p-2">
-                    <EditableCell value={item.client_name} onSave={(v) => updateGros(item.id, 'client_name', v)} className="font-medium" />
+                    <EditableCell value={item.client_name} onSave={(v) => updateGros(item.id, 'client_name', v)} className="font-semibold text-slate-800" />
                   </td>
                   <td className="p-2 text-slate-500">
-                    <EditableCell value={item.client_phone} onSave={(v) => updateGros(item.id, 'client_phone', v)} />
+                    <EditableCell value={item.client_phone} onSave={(v) => updateGros(item.id, 'client_phone', v)} className="text-slate-500" />
                   </td>
                   <td className="p-2">
-                    <EditableCell type="date" value={item.date_created} onSave={(v) => updateGros(item.id, 'date_created', v)} />
+                    <EditableCell type="date" value={item.date_created} onSave={(v) => updateGros(item.id, 'date_created', v)} className="text-slate-600" />
                   </td>
                   <td className="p-2 text-right">
-                    <EditableCell type="number" value={item.prix_achat_article} onSave={(v) => updateGros(item.id, 'prix_achat_article', v)} className="text-right" />
+                    <EditableCell type="number" value={item.prix_achat_article} onSave={(v) => updateGros(item.id, 'prix_achat_article', v)} className="text-right text-slate-600 font-medium" />
                   </td>
                   <td className="p-2">
                     <div className="flex items-center gap-2">
@@ -173,12 +174,12 @@ const CommandesGros: React.FC = () => {
                         className="w-4 h-4 rounded text-blue-600"
                       />
                       {item.impression && (
-                        <EditableCell type="number" value={item.prix_impression} onSave={(v) => updateGros(item.id, 'prix_impression', v)} className="w-20 text-right" />
+                        <EditableCell type="number" value={item.prix_impression} onSave={(v) => updateGros(item.id, 'prix_impression', v)} className="w-20 text-right text-slate-600" />
                       )}
                     </div>
                   </td>
                   <td className="p-2 font-bold text-slate-800 text-right">
-                    <EditableCell type="number" value={item.prix_vente} onSave={(v) => updateGros(item.id, 'prix_vente', v)} className="text-right" />
+                    <EditableCell type="number" value={item.prix_vente} onSave={(v) => updateGros(item.id, 'prix_vente', v)} className="text-right font-bold text-slate-900" />
                   </td>
                   <td className="p-2">
                     <select 
@@ -192,7 +193,7 @@ const CommandesGros: React.FC = () => {
                     </select>
                   </td>
                   <td className="p-4 text-right font-black">
-                    <span className={item.profit_encaisse > 0 ? 'text-emerald-600' : 'text-slate-400'}>
+                    <span className={item.profit_encaisse > 0 ? 'text-emerald-600' : (item.profit_attendu > 0 ? 'text-blue-600' : 'text-slate-400')}>
                       {formatPrice(item.prix_vente - item.cost)}
                     </span>
                   </td>

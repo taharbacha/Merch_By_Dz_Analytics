@@ -57,7 +57,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         onChange={(e) => setLocalValue(e.target.value)}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        className={`w-full p-1 border-2 border-blue-400 outline-none rounded bg-white ${className}`}
+        className={`w-full p-1 border-2 border-blue-400 outline-none rounded bg-white text-slate-800 ${className}`}
       />
     );
   }
@@ -65,7 +65,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   return (
     <div 
       onClick={() => setIsEditing(true)}
-      className={`p-2 cursor-pointer hover:bg-slate-50 rounded transition-colors min-h-[36px] flex items-center ${className}`}
+      className={`p-2 cursor-pointer hover:bg-slate-50 rounded transition-colors min-h-[36px] flex items-center text-slate-700 ${className}`}
     >
       {prefix}{value}
     </div>
